@@ -1,0 +1,64 @@
+/**
+ * Copyright (c) 2011 The Chromium Authors. All rights reserved.
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
+
+
+body {
+  margin: 5px 10px 10px;
+  width: 500px;
+}
+
+#changeColor {
+  width: 500px;
+}
+input {
+  width: 50px;
+}
+
+.massFollow {
+	-moz-box-shadow:inset 0px 1px 0px 0px #00e1cb;
+	-webkit-box-shadow:inset 0px 1px 0px 0px #00e1cb;
+	box-shadow:inset 0px 1px 0px 0px #00e1cb;
+	background-color:#00e1cb;
+	border:1px solid #00e1cb;
+	display:inline-block;
+	cursor:pointer;
+	color:#ffffff;
+	font-family:Arial;
+	font-size:13px;
+	font-weight:bold;
+	padding:6px 50px;
+	text-decoration:none;
+}
+.massFollow:hover {
+	background-color:#00a897;
+}
+.massFollow:active {
+	position:relative;
+	top:1px;
+}
+
+  .cleanFollow {
+    -moz-box-shadow:inset 0px 1px 0px 0px #FF260D;
+    -webkit-box-shadow:inset 0px 1px 0px 0px #FF260D;
+    box-shadow:inset 0px 1px 0px 0px #FF260D;
+    background-color:#FF260D;
+    border:1px solid #FF260D;
+    display:inline-block;
+    cursor:pointer;
+    color:#ffffff;
+    font-family:Arial;
+    font-size:12px;
+    font-weight:bold;
+    padding:5px 50px;
+    text-decoration:none;
+  }
+  .cleanFollow:hover {
+    background-color:#BB1002;
+  }
+  .cleanFollow:active {
+    position:relative;
+    top:1px;
+  }

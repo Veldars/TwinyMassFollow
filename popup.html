@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="popup.css">
+    <link rel="stylesheet" type="text/css" href="lib/jquery.toast.min.css">
+  </head>
+  <body>
+    <div style='margin-top:10px; padding: 5px; height:50px'>
+        <img src='icon.png' width='30px'/>
+      <h2 style='margin-top:-40px; margin-left: 35px'>Twiny Massfollow</h2>
+      <p style='margin-top:-15px; margin-left: 38px' id="nbFollowed">
+        You already followed 0 account with this extension
+      </p>
+  </div>
+
+    <label for='nbToFollow'>Number to follow: </label>
+    <input type='number' id='nbToFollow'  name='nbToFollow' value='200'/>
+    <br/>
+    <br/>
+    <label for='timeToWait'>Time between 2 follow (ms): </label>
+    <input type='number' id='timeToWait'  name='timeToWait' value='1000' size='4'/>
+    <label for='timeToWaitMax'>Max : </label>
+    <input type='number' id='timeToWaitMax'  name='timeToWaitMax' value='3000'/>
+    <br/>
+    <br/>
+    <label for='descRequired'>Follow only account with description : </label>
+    <input type='checkbox' id='descRequired'  name='descRequired' checked/>
+    <br/>
+    <br/>
+    <label for='skipFollowers'>Skip your followers : </label>
+    <input type='checkbox' id='skipFollowers'  name='skipFollowers' checked/>
+    <br/>
+    <br/>
+    <label for='skipProtected'>Skip protected account : </label>
+    <input type='checkbox' id='skipProtected'  name='skipProtected' checked/>
+    <br/>
+    <br/>
+    <label for='skipVerified'>Skip verified account : </label>
+    <input type='checkbox' id='skipVerified'  name='skipVerified' checked/>
+    <br/>
+    <br/>
+    <label for='minNbFollowers'>Account minimum followers: </label>
+    <input type='number' id='minNbFollowers'  name='minNbFollowers' value='0' size='4'/>
+    <label for='maxNbFollowers'>Max (0 = no limit): </label>
+    <input type='number' id='maxNbFollowers'  name='maxNbFollowers' value='0' size='4'/>
+    <br/>
+    <br/>
+    <label for='minTweetNumber'>Minimum of tweets: </label>
+    <input type='number' id='minTweetNumber'  name='minTweetNumber' value='200'/>
+    <br/>
+    <br/>
+
+    <button id="massFollow" class='massFollow'>Start mass-follow</button>
+    <p style='width: 100%; text-align: right'>
+      Powered by <a href='https://twinybots.ch' target='_blank'>twinybots</a>
+    </p>
+    <script src="lib/jquery.js"></script>
+    <script src="lib/jquery.toast.min.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

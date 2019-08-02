@@ -1,0 +1,30 @@
+{
+  "name": "Twitter mass follow",
+  "version": "1.2",
+  "description": "Use this plugin to mass follow on twitter",
+  "permissions": [ "*://*.twitter.com/",
+    "background", "webRequest", "activeTab", "storage", "declarativeContent", "notifications"
+  ],
+  "browser_action": {
+    "default_icon": "icon.png",
+    "js": [
+      "jquery.js"
+    ],
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "persistent": true,
+    "scripts": [
+      "background.js"
+    ]
+  },
+  "content_scripts": [ 
+      { 
+          "js": [ "lib/jquery.js", "lib/jquery.toast.min.js", "startListener.js" ],
+          "css": ["lib/jquery.toast.min.css"],
+           "matches": [ "http://twitter.com/*", "https://twitter.com/*"]
+       }
+   ], 
+  "options_page": "options.html",
+  "manifest_version": 2
+}
