@@ -1,5 +1,5 @@
 {
-  "name": "Twitter mass follow",
+  "name": "Twitter mass follow by Twinybots",
   "version": "1.2",
   "description": "Use this plugin to mass follow on twitter",
   "permissions": [ "*://*.twitter.com/",

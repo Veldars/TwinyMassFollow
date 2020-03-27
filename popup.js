@@ -19,6 +19,7 @@ let timeToWaitMaxKey = "timeToWaitMaxKey";
 let nbFollowed = $('#nbFollowed');
   
   massFollow.click(function() {
+    console.log("start mass follow");
     chrome.tabs.executeScript({
       file: 'massFollow.js'
     }); 

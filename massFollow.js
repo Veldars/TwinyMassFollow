@@ -31,67 +31,101 @@ var counterToast = $.toast({
 async function massFollow() {
 
   var profiles_list = await getUsersToFollow();
-  var index = 0;
+  var btnsFollow = $(`[data-testid*="-follow"]`);
   var counter = 0;
   var prev_counter = 0;
 
   chrome.storage.local.set({ canFollow: false }, () => { });
   g_canFollow = false;
   await sleep(500);
-
   console.log("First Load: " + profiles_list.length);
+  let btnCounter = 0;
+
   while (!g_twitterError) {
-    if (profiles_list.length < 1) {
+    /*if (profiles_list.length < 1) {
       alert("No profil found");
       return;
+    }*/
+
+    console.log(btnsFollow);
+
+    if (btnCounter > 5) {
+      counterToast.update({
+        icon: 'success', 
+        heading: 'End',
+        text : `You followed ${counter} accounts. Twiny do not found anymore users`
+      });
+      console.log("End process, no more people to follow");
+      return ;
     }
-    var nodeValue = profiles_list[index].id_str;
-    var blocked_by = profiles_list[index].blocked_by;
-    var btnFollow = $(`[data-testid="${profiles_list[index].id_str}-follow"]`);
+
+    if (btnsFollow.length === 0) {
+      btnCounter += 1;
+      window.scrollBy(0, 500);
+      await sleep(2000);
+      var new_profiles_list = await loadProfiles(profiles_list); 
+      profiles_list = profiles_list.concat(new_profiles_list);
+      btnsFollow = $(`[data-testid*="-follow"]`);
+      console.log(btnCounter, btnsFollow);
+    }
+    if (btnsFollow.length < 1) continue;
+    else btnCounter = 0;
+
+    const btnFollow = $(btnsFollow[0]);
+
+    console.log(btnFollow.attr('data-testid').split('-')[0]);
+    
+    var profileIndex = profiles_list.findIndex(prof => prof.rest_id === btnFollow.attr('data-testid').split('-')[0] || prof.id_str === btnFollow.attr('data-testid').split('-')[0])
+
+    console.log(profileIndex);
+
+    if (profileIndex === -1) {
+      btnsFollow.splice(0, 1);
+      continue ;
+    }
+
+    var profile = profiles_list[profileIndex];
+
+    var nodeValue = profile.id_str || profile.rest_id;
+    var blocked_by = profile.legacy ? profile.legacy.blocked_by : profile.blocked_by;
+    
+
     if (nodeValue && btnFollow && btnFollow.length > 0 && !blocked_by) {
-      if (testCondition(profiles_list[index], nodeValue)) {
-        var tmpTime = Math.floor(Math.random() * (timeToWaitMax - timeToWait + 1)) + timeToWait;
-        btnFollow.click();
-        await sleep(tmpTime / 2);
-        chrome.runtime.sendMessage({ greeting: "isTwitterError" }, function (response) {
-          if (response.farewell == 'true') {
-            rmId(nodeValue);
-            g_twitterError = true;
-            notifyAlert("Twitter say that you cannot follow more people for now");
-            console.log("Twitter say cannot follow more people");
-            return ;
+      if (testCondition(profile.legacy ? profile.legacy : profile, nodeValue)) {
+        var maxIteration = 0;
+        var isFollowed = false;
+        var btnNoClicked = true;
+        while (!isFollowed) {
+          var tmpTime = Math.floor(Math.random() * (timeToWaitMax - timeToWait + 1)) + timeToWait;
+          await sleep(tmpTime / 2);
+          if (btnNoClicked) {
+            btnFollow.click();
+            btnNoClicked = false;
+            chrome.runtime.sendMessage({ greeting: "isTwitterError" }, async function (response) {
+              if (response.farewell == 'true') {
+                rmId(nodeValue);
+                if (maxIteration > 2) {
+                  g_twitterError = true;
+                  notifyAlert("Twitter say that you cannot follow more people for now, end of retry.");
+                  console.log("Twitter say cannot follow more people");
+                  return ;
+                } else {
+                  notifyAlert("Twitter say that you cannot follow more people for now, will retry in 30 seconds");
+                  maxIteration += 1;
+                  await sleep(30000);
+                  btnNoClicked = true;
+                }
+              } else {
+                isFollowed = true;
+              }
+            });
           }
-        });
-        profiles_list.splice(index, 1);
-        index -= 1;
+        }
         await sleep(tmpTime / 2);
         counter += 1;
       }
     }
-    index += 1;
-    if (index >= profiles_list.length) {
-      $(document).scrollTop($(document).height());
-      var new_profiles_list = await loadProfiles(profiles_list);
-      var maxIteration = 0;
-      while (new_profiles_list.length < 1) {
-        await sleep(200);
-        new_profiles_list = await loadProfiles(profiles_list);
-        maxIteration += 1;
-        if (maxIteration > 10) {
-          counterToast.update({
-            icon: 'success', 
-            heading: 'End',
-            text : `You followed ${counter} accounts. Twiny do not found anymore users`
-          });
-          console.log("End process, no more people to follow");
-          return ;
-        }
-      }
-      profiles_list = new_profiles_list;
-      console.log("Finally found: " + profiles_list.length);
-      await sleep(500);
-      index = 0;
-    }
+    profiles_list.splice(profileIndex, 1);
     if (counter != prev_counter) {
       counterToast.update({
         text : `<h3>You already followed <strong>${counter}</strong> accounts</h3>`
@@ -113,6 +147,7 @@ async function massFollow() {
 function testCondition(user, nodeValue) {
   var result = true;
 
+  console.log("testCondition", user);
   // Not refollow 
   if (descRequired && (!user.description || "" === user.description)) {
     return false;
@@ -144,13 +179,17 @@ async function loadProfiles(profiles_list) {
   var new_profiles_list = [];
   var maxIteration = 0;
   while (!g_canFollow) {
-    await sleep(200);
-    var new_profiles_list = await getUsersToFollow();;
+    await sleep(3000);
+    var new_profiles_list = await getUsersToFollow();
+    if (g_canFollow) {
+      break;
+    }
     maxIteration += 1;
-    if (maxIteration == 10) {
+    if (maxIteration === 5) {
+      console.log('scroll');
       $(document).scrollTop($(document).height());
     }
-    if (maxIteration > 20) {
+    if (maxIteration > 10) {
       return [];
     }
   }
@@ -161,12 +200,14 @@ async function loadProfiles(profiles_list) {
     }
   }
   console.log("After Try-Scroll: " + profiles_list.length);
+  await sleep(3000);
   return profiles_list;
 }
 
 function getUsersToFollow() {
   return new Promise((resolve) => {
     chrome.storage.local.get({ userToFollow: [], canFollow: false }, function (result) {
+      console.log(result);
       g_canFollow = result.canFollow;
       chrome.storage.local.set({ userToFollow: [], canFollow: false }, () => { });
       resolve(result.userToFollow);

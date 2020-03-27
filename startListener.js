@@ -62,9 +62,40 @@ function interceptData() {
     })();
     `
     document.head.prepend(xhrOverrideScript2);
+
+    
+    var xhrOverrideScript3 = document.createElement('script');
+    xhrOverrideScript3.type = 'text/javascript';
+    xhrOverrideScript3.innerHTML = `
+    (function() {
+      var XHR = XMLHttpRequest.prototype;
+      var send = XHR.send;
+      var open = XHR.open;
+      XHR.open = function(method, url) {
+          this.url = url; // the request url
+          return open.apply(this, arguments);
+      }
+      XHR.send = function() {
+          this.addEventListener('load', function() {
+              
+              if (this.url.includes('/Followers') || this.url.includes('/Following')) {
+                  var dataDOMElement = document.createElement('div');
+                  dataDOMElement.id = '__interceptedData3';
+                  dataDOMElement.innerText = this.response;
+                  dataDOMElement.style.height = 0;
+                  dataDOMElement.style.overflow = 'hidden';
+                  document.body.appendChild(dataDOMElement);
+              }               
+          });
+          return send.apply(this, arguments);
+      };
+    })();
+    `
+    document.head.prepend(xhrOverrideScript3);
 }
 
 function checkForDOM() {
+    console.log("checkForDOM");
     if (document.body && document.head) {
         interceptData();
     } else {
@@ -97,6 +128,18 @@ function scrapeData2() {
     setTimeout(() => requestIdleCallback(scrapeData2), 1000);
 }
 requestIdleCallback(scrapeData2); 
+
+function scrapeData3() {
+    var responseContainingEle = document.getElementById('__interceptedData3');
+    if (responseContainingEle) {
+        chrome.runtime.sendMessage({ userToFollowNew: responseContainingEle.innerHTML }, function (response) {
+            console.log(response.farewell);
+        });
+        responseContainingEle.remove();
+    }
+    setTimeout(() => requestIdleCallback(scrapeData3), 1000);
+}
+requestIdleCallback(scrapeData3); 
 
 chrome.runtime.sendMessage({ greeting: "start_network_watcher" }, function (response) {
     console.log(response.farewell);
